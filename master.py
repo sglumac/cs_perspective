@@ -56,48 +56,43 @@ def run(fmus, connections, dt, tEnd, sequence=None):
         fmu.exitInitializationMode()
 
  
-    values = dict()
-    for name, slave in slaves.items():
+    values = {(name, port): [] for name in slaves.keys() for port in _outputs(slaves[name])}
+
+    def update_inputs(name, slave):
+        input_vars = _inputs(slave)
+        input_vals = dict()
+        for u in input_vars.keys():
+            val_ref = input_vars[u]
+            s, y = connections[name, u]
+            out_vars = _outputs(slaves[s])
+            input_vals[val_ref] = slaves[s].fmu.getReal([out_vars[y]])[0]
+        slave.fmu.setReal(input_vals.keys(), input_vals.values())
+
+    def read_outputs(name, slave, t):
         for y in _outputs(slave):
             out_vars = _outputs(slave)
             out_vals = slave.fmu.getReal(out_vars.values())
             for port, val in zip(out_vars.keys(), out_vals):
-                values[name, port] = [(0., val)]
+                values[name, port].append((t, val))
+
+    for name, slave in slaves.items():
+        read_outputs(name, slave, 0.)
 
     t = 0.
     while t < tEnd:
         if sequence:
             for name in sequence:
                 slave = slaves[name]
-                for u in inputs(slave):
-                    s, y = connections[name, u]
-                    v = slaves[s].get(y)
-                    slave.set(u, v)
-
-                slave.do_step(t0, dt, pyfmi.fmi.FMI2_TRUE)
-
-                for y in outputs(slave):
-                    v = slave.get(y)
-                    values[name, y].append((t + dt, v[0]))
+                update_inputs(name, slave)
+                slave.fmu.doStep(t, dt)
+                read_outputs(name, slave, t + dt)
         else:
             for name, slave in slaves.items():
-                input_vars = _inputs(slave)
-                input_vals = dict()
-                out_vals = dict(zip(out_vars.keys(), slave.fmu.getReal(out_vars.values())))
-                for u in input_vars.keys():
-                    val_ref = input_vars[u]
-                    s, y = connections[name, u]
-                    out_vars = _outputs(slaves[s])
-                    input_vals[val_ref] = slaves[s].fmu.getReal([out_vars[y]])[0]
-                slave.fmu.setReal(input_vals.keys(), input_vals.values())
-
+                update_inputs(name, slave)
             for name, slave in slaves.items():
                 slave.fmu.doStep(t, dt)
-                for y in _outputs(slave):
-                    out_vars = _outputs(slave)
-                    out_vals = slave.fmu.getReal(out_vars.values())
-                    for port, val in zip(out_vars.keys(), out_vals):
-                        values[name, port].append((t + dt, val))
+                read_outputs(name, slave, t + dt)
+
         t = t + dt
 
     return values
