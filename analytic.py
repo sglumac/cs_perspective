@@ -20,7 +20,7 @@ def analytic_step_solution(w_omega, w_alpha, d, J, stepAmp=1, start_time=0., end
     lmbda = - (d - w_omega) / J
     k = w_alpha*stepAmp/(d-w_omega)
 
-    ts = np.linspace(start_time, end_time, 1/freq)
+    ts = np.linspace(start_time, end_time, int(1/freq))
     omegas = [
         first_order_response(k, lmbda, t) 
         for t in ts
@@ -31,9 +31,8 @@ def analytic_step_solution(w_omega, w_alpha, d, J, stepAmp=1, start_time=0., end
     ]
     return ts, omegas, taus
 
-def main():
-    sol = analytic_solution(1.,1.,10.,10.)
-    plt.plot(ts, sol[1])
+
+if __name__ == "__main__":
+    sol = analytic_step_solution(1.,1.,10.,10.)
+    plt.plot(sol[0], sol[1])
     plt.show() 
-
-
