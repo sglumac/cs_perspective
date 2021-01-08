@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Instances>
+        <Instance instanceName="INPUT">
+            <Archive archiveName="simpleStep.fmu"/>
+            <Parameters>
+                <Parameter name="MDL.simpleStep.stepFinalValue.v" value="1."/>
+                <Parameter name="MDL.simpleStep.stepStartValue.v" value="0."/>
+                <Parameter name="MDL.simpleStep.stepTime.v" value="1."/>
+            </Parameters>
+        </Instance>
+        <Instance instanceName="ENGINE">
+            <Archive archiveName="EngineModel_2_R2018b.fmu"/>
+            <Parameters>
+                <Parameter name="MDL.EngineModel_2_R2018b.w_omega.v" value="1."/>
+                <Parameter name="MDL.EngineModel_2_R2018b.w_alpha.v" value="1."/>
+            </Parameters>
+        </Instance>
+		<Instance instanceName="INERTIA">
+            <Archive archiveName="simulationModel_2.fmu"/>
+            <Parameters>
+                <Parameter name="MDL.simulationModel_2.J.v" value="10."/>
+                <Parameter name="MDL.simulationModel_2.d.v" value="10."/>
+            </Parameters>
+        </Instance>
+    </Instances>
+    <Connections>
+        <Connection>
+            <Source instanceName="INPUT" outputName="simpleStep_Output1"/>
+            <Destination instanceName="ENGINE" inputName="Alpha_EngineModel_2"/>
+        </Connection>
+        <Connection>
+            <Source instanceName="ENGINE" outputName="Tau_EngineModel_2"/>
+            <Destination instanceName="INERTIA" inputName="Tau_SimulatioModel_2"/>
+        </Connection>
+		<Connection>
+            <Source instanceName="INERTIA" outputName="Omega_SimulatioModel_2"/>
+            <Destination instanceName="ENGINE" inputName="Omega_EngineModel_2"/>
+        </Connection>
+    </Connections>
+</Configuration>
