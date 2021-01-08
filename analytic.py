@@ -1,6 +1,7 @@
 import numpy as np  # pylint: disable=import-error
 from typing import NamedTuple, Callable, Dict, Any
 from fractions import Fraction
+import matplotlib.pyplot as plt
     
     
 def first_order_response(k, lmbda, ts):
@@ -30,5 +31,9 @@ def analytic_step_solution(w_omega, w_alpha, d, J, stepAmp=1, start_time=0., end
     ]
     return ts, omegas, taus
 
+def main():
+    sol = analytic_solution(1.,1.,10.,10.)
+    plt.plot(ts, sol[1])
+    plt.show() 
 
 
