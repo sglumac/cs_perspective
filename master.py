@@ -36,7 +36,7 @@ def _inputs(slave):
     return _filter_mvs(slave.description.modelVariables, 'input')
 
 
-def run(fmu, connections, dt, tEnd, sequence=None):
+def run(fmus, connections, dt, tEnd, sequence=None):
     """
     Run the 
     Gauss-Seidel (sequence = ordered list of instance names)
@@ -46,38 +46,58 @@ def run(fmu, connections, dt, tEnd, sequence=None):
     """
     slaves = {
         name: load_fmu(name, fmu['archivePath'])
-        for name, fmu in fmus
+        for name, fmu in fmus.items()
     }
 
-    for slave in slaves.values():
-        slave.instantiate()
-        slave.setupExperiment(startTime=0.)
-        slave.enterInitializationMode()
-        slave.exitInitializationMode()
+    for _, fmu in slaves.values():
+        fmu.instantiate()
+        fmu.setupExperiment(startTime=0.)
+        fmu.enterInitializationMode()
+        fmu.exitInitializationMode()
 
  
     values = dict()
     for name, slave in slaves.items():
         for y in _outputs(slave):
-            values[name, y] = [(0., slave.get(y)[0])]
+            out_vars = _outputs(slave)
+            out_vals = slave.fmu.getReal(out_vars.values())
+            for port, val in zip(out_vars.keys(), out_vals):
+                values[name, port] = [(0., val)]
 
     t = 0.
     while t < tEnd:
-        for name in sequence:
-            slave = slaves[name]
-            for u in inputs(slave):
-                s, y = connections[name, u]
-                v = slaves[s].get(y)
-                slave.set(u, v)
+        if sequence:
+            for name in sequence:
+                slave = slaves[name]
+                for u in inputs(slave):
+                    s, y = connections[name, u]
+                    v = slaves[s].get(y)
+                    slave.set(u, v)
 
-            slave.do_step(t0, dt, pyfmi.fmi.FMI2_TRUE)
+                slave.do_step(t0, dt, pyfmi.fmi.FMI2_TRUE)
 
-            for y in outputs(slave):
-                v = slave.get(y)
-                values[name, y].append((t + dt, v[0]))
+                for y in outputs(slave):
+                    v = slave.get(y)
+                    values[name, y].append((t + dt, v[0]))
+        else:
+            for name, slave in slaves.items():
+                input_vars = _inputs(slave)
+                input_vals = dict()
+                out_vals = dict(zip(out_vars.keys(), slave.fmu.getReal(out_vars.values())))
+                for u in input_vars.keys():
+                    val_ref = input_vars[u]
+                    s, y = connections[name, u]
+                    out_vars = _outputs(slaves[s])
+                    input_vals[val_ref] = slaves[s].fmu.getReal([out_vars[y]])[0]
+                slave.fmu.setReal(input_vals.keys(), input_vals.values())
+
+            for name, slave in slaves.items():
+                slave.fmu.doStep(t, dt)
+                for y in _outputs(slave):
+                    out_vars = _outputs(slave)
+                    out_vals = slave.fmu.getReal(out_vars.values())
+                    for port, val in zip(out_vars.keys(), out_vals):
+                        values[name, port].append((t + dt, val))
         t = t + dt
-                
-    for signal in values:
-        values[signal] = np.array(values[signal]).T
 
     return values
