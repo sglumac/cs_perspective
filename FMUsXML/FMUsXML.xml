@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Instances>
-        <Instance instanceName="INPUT">
+        <Instance instanceName="Alpha">
             <Archive archiveName="simpleStep.fmu"/>
             <Parameters>
                 <Parameter name="MDL.simpleStep.stepFinalValue.v" value="1."/>
@@ -9,14 +9,14 @@
                 <Parameter name="MDL.simpleStep.stepTime.v" value="1."/>
             </Parameters>
         </Instance>
-        <Instance instanceName="ENGINE">
+        <Instance instanceName="Engine">
             <Archive archiveName="EngineModel_2_R2018b.fmu"/>
             <Parameters>
                 <Parameter name="MDL.EngineModel_2_R2018b.w_omega.v" value="1."/>
                 <Parameter name="MDL.EngineModel_2_R2018b.w_alpha.v" value="1."/>
             </Parameters>
         </Instance>
-		<Instance instanceName="INERTIA">
+		<Instance instanceName="Inertia">
             <Archive archiveName="simulationModel_2.fmu"/>
             <Parameters>
                 <Parameter name="MDL.simulationModel_2.J.v" value="10."/>
@@ -26,16 +26,16 @@
     </Instances>
     <Connections>
         <Connection>
-            <Source instanceName="INPUT" outputName="simpleStep_Output1"/>
-            <Destination instanceName="ENGINE" inputName="Alpha_EngineModel_2"/>
+            <Source instanceName="Alpha" outputName="output"/>
+            <Destination instanceName="Engine" inputName="alpha"/>
         </Connection>
         <Connection>
-            <Source instanceName="ENGINE" outputName="Tau_EngineModel_2"/>
-            <Destination instanceName="INERTIA" inputName="Tau_SimulatioModel_2"/>
+            <Source instanceName="Engine" outputName="torque"/>
+            <Destination instanceName="Inertia" inputName="torque"/>
         </Connection>
 		<Connection>
-            <Source instanceName="INERTIA" outputName="Omega_SimulatioModel_2"/>
-            <Destination instanceName="ENGINE" inputName="Omega_EngineModel_2"/>
+            <Source instanceName="Inertia" outputName="velocity"/>
+            <Destination instanceName="Engine" inputName="velocity"/>
         </Connection>
     </Connections>
 </Configuration>
