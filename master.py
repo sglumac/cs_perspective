@@ -1,4 +1,5 @@
 from typing import NamedTuple
+from itertools import chain
 import fmpy  # pylint: disable=import-error
 from fmpy.fmi2 import FMU2Slave  # pylint: disable=import-error
 from fmpy.model_description import ModelDescription  # pylint: disable=import-error
@@ -56,7 +57,12 @@ def run(fmus, connections, dt, tEnd, sequence=None):
         fmu.exitInitializationMode()
 
  
-    values = {(name, port): [] for name in slaves.keys() for port in _outputs(slaves[name])}
+    results = {
+        (name, port): []
+        for name in slaves.keys()
+        for port in chain(_inputs(slaves[name]), _outputs(slaves[name]))
+    }
+    results['step_size'] = dt
 
     def update_inputs(name, slave):
         input_vars = _inputs(slave)
@@ -67,13 +73,15 @@ def run(fmus, connections, dt, tEnd, sequence=None):
             out_vars = _outputs(slaves[s])
             input_vals[val_ref] = slaves[s].fmu.getReal([out_vars[y]])[0]
         slave.fmu.setReal(input_vals.keys(), input_vals.values())
+        for var, val_ref in input_vars.items():
+            results[name, var] = input_vals[val_ref]
 
     def read_outputs(name, slave, t):
         for y in _outputs(slave):
             out_vars = _outputs(slave)
             out_vals = slave.fmu.getReal(out_vars.values())
             for port, val in zip(out_vars.keys(), out_vals):
-                values[name, port].append((t, val))
+                results[name, port].append(val)
 
     for name, slave in slaves.items():
         read_outputs(name, slave, 0.)
@@ -95,4 +103,4 @@ def run(fmus, connections, dt, tEnd, sequence=None):
 
         t = t + dt
 
-    return values
+    return results
