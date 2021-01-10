@@ -32,11 +32,12 @@ def run_simulations(slaves, connections, sequences, step_size):
     """
     Runs co-simulations and the analytical calculation for the give step size.
     """
+    tEnd = 10.
     results = {
-        name: master.run(slaves, connections, step_size, 10., sequence)
+        name: master.run(slaves, connections, step_size, tEnd, sequence)
         for name, sequence in sequences.items()
     }
-    return results, analytic.solution(10., step_size)
+    return results, analytic.solution(step_size, tEnd)
 
 
 def plot_signals():
