@@ -37,7 +37,7 @@ def _inputs(slave):
     return _filter_mvs(slave.description.modelVariables, 'input')
 
 
-def run(fmus, connections, dt, tEnd, sequence=None):
+def run(slaves, connections, dt, tEnd, sequence=None):
     """
     Run the 
     Gauss-Seidel (sequence = ordered list of instance names)
@@ -45,11 +45,6 @@ def run(fmus, connections, dt, tEnd, sequence=None):
     Jacobi (sequence=None)
     type co-simulation
     """
-    slaves = {
-        name: load_fmu(name, fmu['archivePath'])
-        for name, fmu in fmus.items()
-    }
-
     for _, fmu in slaves.values():
         fmu.instantiate()
         fmu.setupExperiment(startTime=0.)
@@ -62,7 +57,6 @@ def run(fmus, connections, dt, tEnd, sequence=None):
         for name in slaves.keys()
         for port in chain(_inputs(slaves[name]), _outputs(slaves[name]))
     }
-    results['step_size'] = dt
 
     def update_inputs(name, slave):
         input_vars = _inputs(slave)
@@ -102,5 +96,8 @@ def run(fmus, connections, dt, tEnd, sequence=None):
                 read_outputs(name, slave, t + dt)
 
         t = t + dt
+
+    for slave in slaves.values():
+        slave.fmu.terminate()
 
     return results

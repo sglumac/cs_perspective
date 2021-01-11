@@ -25,7 +25,8 @@ def co_simulations():
         'Gauss-Seidel 21': ['Alpha', 'Inertia', 'Engine']
     }
     slaves, connections = configuration.read(fmu_dir(), 'example.xml')
-    return slaves, connections, sequences
+    fmus = {name: master.load_fmu(name, description['archivePath']) for name, description in slaves.items()}
+    return fmus, connections, sequences
 
 
 def run_simulations(slaves, connections, sequences, step_size):
@@ -43,12 +44,13 @@ def run_simulations(slaves, connections, sequences, step_size):
 def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences = co_simulations()
-    results, analytical = run_simulations(slaves, connections, sequences, 1e-1)
+    step_size = 1e-1
+    results, analytical  = run_simulations(slaves, connections, sequences, step_size)
     results['analytical'] = analytical
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
     for name, result in results.items():
-        ts = result['step_size'] * np.arange(len(result['Inertia', 'velocity']))
+        ts = step_size * np.arange(len(result['Inertia', 'velocity']))
         axVelocity.plot(ts, result['Inertia', 'velocity'], label=name)
         axTorque.plot(ts, result['Engine', 'torque'], label=name)
 
@@ -62,20 +64,21 @@ def residual_analysis():
     """
     slaves, connections, sequences = co_simulations()
     step_sizes = [1 / den for den in 2 ** np.arange(1, 10)]
-    torque_errors = []
-    velocity_errors = []
-    tot_pow_residuals = []
+    torque_errors = {sequence: [] for sequence in sequences}
+    velocity_errors = {sequence: [] for sequence in sequences}
+    tot_pow_residuals = {sequence: [] for sequence in sequences}
     for step_size in step_sizes:
         results, analytical = run_simulations(slaves, connections, sequences, step_size)
-        tot_pow_residuals.append(
-            evaluation.total_power_residual(
-                connections, results,
-                ('Inertia', 'torque'), ('Engine', 'velocity')
+        for sequence in sequences:
+            tot_pow_residuals[sequence].append(
+                evaluation.total_power_residual(
+                    connections, results[sequence], step_size,
+                    ('Inertia', 'torque'), ('Engine', 'velocity')
+                )
             )
-        )
-        err = evaluation.global_error(connections, results)
-        torque_errors.append(err['Engine', 'torque'])
-        velocity_errors.append(err['Inertia', 'velocity'])
+            errs = evaluation.global_error(results[sequence], analytical, step_size)
+            torque_errors[sequence].append(errs['Engine', 'torque'])
+            velocity_errors[sequence].append(errs['Inertia', 'velocity'])
 
     _, (axTotPowResidual, axTorqueErr, axVelErr) = plt.subplots(3, 1, sharex=True)
     axTotPowResidual.plot(step_size)

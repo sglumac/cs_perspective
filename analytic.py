@@ -28,7 +28,6 @@ def solution(dt, tEnd, w_omega=1., w_alpha=1., d=10., J=10., stepAmp=1):
         t += dt
         ts.append(t)
         
-    results['step_size'] = dt
     omega2 = first_order_response(0, k, lmbda, 1)
 
     def omega_calc(t):
@@ -48,6 +47,8 @@ def solution(dt, tEnd, w_omega=1., w_alpha=1., d=10., J=10., stepAmp=1):
     ]
     results['Inertia', 'torque'] = taus
     results['Engine', 'torque'] = taus
+    results['Alpha', 'output'] = [stepAmp if (t >= 1. and t < 2.) else 0. for t in ts]
+    results['Engine', 'alpha'] = results['Alpha', 'output']
     return results
 
 
