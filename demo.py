@@ -80,8 +80,18 @@ def residual_analysis():
             torque_errors[sequence].append(errs['Engine', 'torque'])
             velocity_errors[sequence].append(errs['Inertia', 'velocity'])
 
-    _, (axTotPowResidual, axTorqueErr, axVelErr) = plt.subplots(3, 1, sharex=True)
-    axTotPowResidual.plot(step_size)
+    _, axs = plt.subplots(3, 1, sharex=True)
+    axTotPowResidual, axTorqueErr, axVelErr = axs
+
+    for sequence in sequences:
+        axTotPowResidual.plot(step_sizes, tot_pow_residuals[sequence])
+        axTorqueErr.plot(step_sizes, torque_errors[sequence])
+        axVelErr.plot(step_sizes, velocity_errors[sequence])
+
+    for ax in axs:
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+    plt.show()
 
 
 if __name__ == '__main__':
