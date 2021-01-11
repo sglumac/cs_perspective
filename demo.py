@@ -84,13 +84,17 @@ def residual_analysis():
     axTotPowResidual, axTorqueErr, axVelErr = axs
 
     for sequence in sequences:
-        axTotPowResidual.plot(step_sizes, tot_pow_residuals[sequence])
-        axTorqueErr.plot(step_sizes, torque_errors[sequence])
-        axVelErr.plot(step_sizes, velocity_errors[sequence])
+        axTotPowResidual.plot(step_sizes, tot_pow_residuals[sequence], label=sequence)
+        axTorqueErr.plot(step_sizes, torque_errors[sequence], label=sequence)
+        axVelErr.plot(step_sizes, velocity_errors[sequence], label=sequence)
+    axTotPowResidual.set_title('Total power residual')
+    axTorqueErr.set_title('Torque global error')
+    axVelErr.set_title('Velocity global error')
 
     for ax in axs:
         ax.set_xscale('log')
         ax.set_yscale('log')
+        ax.legend()
     plt.show()
 
 
