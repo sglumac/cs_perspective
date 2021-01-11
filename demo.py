@@ -67,8 +67,7 @@ def residual_analysis():
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences} 
-    GS_torque_error_subtract = [ 0 for i in range(len(step_sizes)) ]  #init array
-    GS_velocity_error_subtract = [ 0 for i in range(len(step_sizes)) ]  #init array
+
     for step_size in step_sizes:
         results, analytic = run_simulations(slaves, connections, sequences, step_size)
         for sequence in sequences:
@@ -81,8 +80,13 @@ def residual_analysis():
             errs = evaluation.global_error(results[sequence], analytic, step_size)
             torque_errors[sequence].append(errs['Engine', 'torque'])
             velocity_errors[sequence].append(errs['Inertia', 'velocity'])
-        GS_torque_error_subtract[int(step_size)] = torque_errors['Gauss-Seidel 12'][int(step_size)] - torque_errors['Gauss-Seidel 21'][int(step_size)]
-        GS_velocity_error_subtract[int(step_size)] = velocity_errors['Gauss-Seidel 12'][int(step_size)] - velocity_errors['Gauss-Seidel 21'][int(step_size)]
+
+    GS_torque_error_subtract = [
+        gs12 - gs21 for gs12, gs21 in zip(torque_errors['Gauss-Seidel 12'], torque_errors['Gauss-Seidel 21'])
+    ]
+    GS_velocity_error_subtract = [
+        gs12 - gs21 for gs12, gs21 in zip(velocity_errors['Gauss-Seidel 12'], velocity_errors['Gauss-Seidel 21'])
+    ]
 
     _, axs = plt.subplots(3, 1, sharex=True)
     axTotPowResidual, axTorqueErr, axVelErr = axs
