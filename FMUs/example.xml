@@ -7,6 +7,9 @@
                 <Parameter name="MDL.simpleStep.stepFinalValue.v" value="1."/>
                 <Parameter name="MDL.simpleStep.stepStartValue.v" value="0."/>
                 <Parameter name="MDL.simpleStep.stepTime.v" value="1."/>
+				<Parameter name="MDL.simpleStep.stepFinalValueDown.v" value="-1."/>
+				<Parameter name="MDL.simpleStep.stepStartValueDown.v" value="0."/>
+				<Parameter name="MDL.simpleStep.stepTimeDown.v" value="2."/>
             </Parameters>
         </Instance>
         <Instance instanceName="Engine">
