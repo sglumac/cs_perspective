@@ -68,17 +68,18 @@ def run(slaves, connections, dt, tEnd, sequence=None):
             input_vals[val_ref] = slaves[s].fmu.getReal([out_vars[y]])[0]
         slave.fmu.setReal(input_vals.keys(), input_vals.values())
         for var, val_ref in input_vars.items():
-            results[name, var] = input_vals[val_ref]
+            results[name, var].append(input_vals[val_ref])
 
     def read_outputs(name, slave, t):
-        for y in _outputs(slave):
-            out_vars = _outputs(slave)
-            out_vals = slave.fmu.getReal(out_vars.values())
-            for port, val in zip(out_vars.keys(), out_vals):
-                results[name, port].append(val)
+        out_vars = _outputs(slave)
+        out_vals = slave.fmu.getReal(out_vars.values())
+        for port, val in zip(out_vars.keys(), out_vals):
+            results[name, port].append(val)
 
     for name, slave in slaves.items():
         read_outputs(name, slave, 0.)
+    for name, slave in slaves.items():
+        update_inputs(name, slave)
 
     t = 0.
     while t < tEnd:
