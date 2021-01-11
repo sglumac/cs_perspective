@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import configuration
 import master
-import analytic
+import analytical
 import evaluation
 
 
@@ -38,15 +38,15 @@ def run_simulations(slaves, connections, sequences, step_size):
         name: master.run(slaves, connections, step_size, tEnd, sequence)
         for name, sequence in sequences.items()
     }
-    return results, analytic.solution(step_size, tEnd)
+    return results, analytical.solution(step_size, tEnd)
 
 
 def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences = co_simulations()
     step_size = 1e-1
-    results, analytical  = run_simulations(slaves, connections, sequences, step_size)
-    results['analytical'] = analytical
+    results, analytic  = run_simulations(slaves, connections, sequences, step_size)
+    results['analytical'] = analytic
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
     for name, result in results.items():
@@ -68,7 +68,7 @@ def residual_analysis():
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences}
     for step_size in step_sizes:
-        results, analytical = run_simulations(slaves, connections, sequences, step_size)
+        results, analytic = run_simulations(slaves, connections, sequences, step_size)
         for sequence in sequences:
             tot_pow_residuals[sequence].append(
                 evaluation.total_power_residual(
@@ -76,7 +76,7 @@ def residual_analysis():
                     ('Inertia', 'torque'), ('Engine', 'velocity')
                 )
             )
-            errs = evaluation.global_error(results[sequence], analytical, step_size)
+            errs = evaluation.global_error(results[sequence], analytic, step_size)
             torque_errors[sequence].append(errs['Engine', 'torque'])
             velocity_errors[sequence].append(errs['Inertia', 'velocity'])
 
@@ -85,4 +85,4 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    plot_signals()
+    residual_analysis()

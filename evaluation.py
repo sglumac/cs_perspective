@@ -27,11 +27,11 @@ def total_power_residual(connections, results, step_size, effort_port, flow_port
     return step_size * np.cumsum(np.abs(power_residual))[-1]
 
 
-def global_error(results, analytical, step_size):
+def global_error(results, analytic, step_size):
     """
     Calculates the global error of all the signals.
     """
     return {
-        port: step_size * np.cumsum(np.abs(np.array(results[port]) - analytical[port]))[-1]
+        port: step_size * np.cumsum(np.abs(np.array(results[port]) - analytic[port]))[-1]
         for port, vals in results.items()
     }
