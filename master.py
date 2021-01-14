@@ -37,7 +37,11 @@ def _inputs(slave):
     return _filter_mvs(slave.description.modelVariables, 'input')
 
 
-def run(slaves, connections, dt, tEnd, sequence=None):
+def _parameters(slave):
+    return _filter_mvs(slave.description.modelVariables, 'parameter')
+
+
+def run(slaves, connections, dt, tEnd, sequence=None, parameters=None):
     """
     Run the 
     Gauss-Seidel (sequence = ordered list of instance names)
@@ -45,12 +49,18 @@ def run(slaves, connections, dt, tEnd, sequence=None):
     Jacobi (sequence=None)
     type co-simulation
     """
-    for _, fmu in slaves.values():
-        fmu.instantiate()
-        fmu.setupExperiment(startTime=0.)
-        fmu.enterInitializationMode()
-        fmu.exitInitializationMode()
-
+    for name, slave in slaves.items():
+        slave.fmu.instantiate()
+        slave.fmu.setupExperiment(startTime=0.)
+        slave.fmu.enterInitializationMode()
+        if parameters and name in parameters:
+            parameter_vars = _parameters(slave)
+            refs_vals = dict(
+                (parameter_vars[parameter], value)
+                for parameter, value in parameters[name].items()
+            )
+            slave.fmu.setReal(refs_vals.keys(), refs_vals.values())
+        slave.fmu.exitInitializationMode()
  
     results = {
         (name, port): []

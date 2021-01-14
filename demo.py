@@ -35,7 +35,7 @@ def run_simulations(slaves, connections, sequences, step_size):
     """
     tEnd = 10.
     results = {
-        name: master.run(slaves, connections, step_size, tEnd, sequence)
+        name: master.run(slaves, connections, step_size, tEnd, sequence, {'Engine': {'w_omega': 3}})
         for name, sequence in sequences.items()
     }
     return results, analytical.solution(step_size, tEnd)
@@ -197,4 +197,5 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    residual_analysis()
+    plot_signals()
+    #residual_analysis()
