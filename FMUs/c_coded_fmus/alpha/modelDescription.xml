@@ -32,5 +32,9 @@
          <Real max="100" min="0" start="2" />
       </ScalarVariable>
    </ModelVariables>
-   <ModelStructure/>
+   <ModelStructure>
+      <Outputs>
+         <Unknown index="1"/>
+      </Outputs>
+   </ModelStructure>
 </fmiModelDescription>

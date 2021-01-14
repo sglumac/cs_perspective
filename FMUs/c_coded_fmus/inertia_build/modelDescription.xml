@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fmiModelDescription modelName="Gain" description="Gain" fmiVersion="2.0" guid="{481bd0fd-3a1a-4530-98e2-685fa567810c}" version="1.0.0.0">
-   <CoSimulation modelIdentifier="Gain"/>
+<fmiModelDescription modelName="Inertia" description="Inertia" fmiVersion="2.0" guid="{481bd0fd-3a1a-4530-98e2-685fa567810c}" version="1.0.0.0">
+   <CoSimulation modelIdentifier="Inertia"/>
    <ModelVariables>
-     <ScalarVariable causality="input" name="Input" valueReference="0" variability="discrete">
-       <Real start="0"/>
-     </ScalarVariable>
-     <ScalarVariable causality="output" name="Output" valueReference="1" variability="discrete">
-       <Real start="0"/>
-     </ScalarVariable>
-     <ScalarVariable causality="parameter" name="Gain" valueReference="2" variability="tunable"> 
-       <Real start="2"/>
-     </ScalarVariable>
+      <ScalarVariable causality="input" name="torque" valueReference="0" variability="discrete">
+         <Real start="0" />
+      </ScalarVariable>
+      <ScalarVariable causality="output" name="velocity" valueReference="1" variability="discrete">
+         <Real />
+      </ScalarVariable>
+      <ScalarVariable causality="parameter" name="J" valueReference="2"
+                      variability="tunable">
+         <Real max="100" min="0" start="10" />
+      </ScalarVariable>
+      <ScalarVariable causality="parameter" name="d" valueReference="3"
+                      variability="tunable">
+         <Real max="100" min="0" start="10" />
+      </ScalarVariable>
    </ModelVariables>
-   <ModelStructure/>
+   <ModelStructure>
+      <Outputs>
+         <Unknown index="2"/>
+      </Outputs>
+   </ModelStructure>
 </fmiModelDescription>

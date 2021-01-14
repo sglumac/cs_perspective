@@ -2,7 +2,7 @@
 <Configuration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Instances>
         <Instance instanceName="Alpha">
-            <Archive archiveName="simpleStep.fmu"/>
+            <Archive archiveName="alpha.fmu"/>
             <Parameters>
                 <Parameter name="MDL.simpleStep.stepFinalValue.v" value="1."/>
                 <Parameter name="MDL.simpleStep.stepStartValue.v" value="0."/>
@@ -13,14 +13,14 @@
             </Parameters>
         </Instance>
         <Instance instanceName="Engine">
-            <Archive archiveName="EngineModel_2_R2018b.fmu"/>
+            <Archive archiveName="engine.fmu"/>
             <Parameters>
                 <Parameter name="MDL.EngineModel_2_R2018b.w_omega.v" value="1."/>
                 <Parameter name="MDL.EngineModel_2_R2018b.w_alpha.v" value="1."/>
             </Parameters>
         </Instance>
 		<Instance instanceName="Inertia">
-            <Archive archiveName="simulationModel_2.fmu"/>
+            <Archive archiveName="inertia.fmu"/>
             <Parameters>
                 <Parameter name="MDL.simulationModel_2.J.v" value="10."/>
                 <Parameter name="MDL.simulationModel_2.d.v" value="10."/>
