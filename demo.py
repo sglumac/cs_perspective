@@ -58,6 +58,36 @@ def plot_signals():
     plt.show()
 
 
+def plot_residual_analysis(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'linear', titles = [], legends = []):
+    """ The script fpr ploting data for mthod residual_analysis()"""
+    
+    _, axs = plt.subplots(len(dataY), 1, sharex=True)   
+    if len(dataY) > 1:
+        for ax, i in zip(axs, range(len(dataY))):    
+            if sequences != 0:
+                for sequence in sequences:    
+                    ax.plot(dataX, dataY[i][sequence], label = ''.join([str(sequence) if legends == [] else legends[i]]))                     
+            else:
+                ax.plot(dataX, dataY[i], label = legends[i])
+            ax.set_xscale(xScale)
+            ax.set_yscale(yScale)
+            ax.legend()
+            if titles != []:
+                ax.set_title(titles[i])
+    else:            
+        if sequences != 0:
+            for sequence in sequences:
+                axs.plot(dataX, dataY[0][sequence], label = ''.join([str(sequence) if legends == [] else legends]))
+        else:
+            axs.plot(dataX, dataY[0], label = legends)
+        axs.set_xscale(xScale)
+        axs.set_yscale(yScale)
+        axs.legend()
+        if titles != []:
+            axs.set_title(titles)
+    plt.show()
+
+
 def residual_analysis():
     """
     The analysis of total power residual and its comparison to the global error.
@@ -67,8 +97,6 @@ def residual_analysis():
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences} 
-    #engine_power = {sequence: [] for sequence in sequences}
-    #inertia_power = {sequence: [] for sequence in sequences}
     engine_power_errors = {sequence: [] for sequence in sequences}
     inertia_power_errors = {sequence: [] for sequence in sequences}
     power_errors = {sequence: [] for sequence in sequences}
@@ -80,8 +108,6 @@ def residual_analysis():
 
     for step_size in step_sizes:
         results, analytic = run_simulations(slaves, connections, sequences, step_size)
-        #engineAnalytic_power.append(step_size * np.cumsum(np.abs(np.array(list(analytic['Engine','torque']))*list(analytic['Engine','velocity'])))[-1])
-        #inertiaAnalytic_power.append(step_size * np.cumsum(np.abs(np.array(list(analytic['Inertia','torque']))*list(analytic['Inertia','velocity'])))[-1])
         engineAnalytic_power = np.array(analytic['Engine','torque'])*analytic['Engine','velocity']
         inertiaAnalytic_power = np.array(analytic['Inertia','torque'])*analytic['Inertia','velocity']
         Analytic_power = np.array(analytic['Engine','torque'])*analytic['Inertia','velocity']
@@ -97,8 +123,6 @@ def residual_analysis():
             torque_errors[sequence].append(errs['Engine', 'torque'])
             velocity_errors[sequence].append(errs['Inertia', 'velocity'])
             
-            #engine_power[sequence].append(step_size * np.cumsum(np.abs(np.array(list(results[sequence]['Engine','torque']))*list(results[sequence]['Engine','velocity'])))[-1])
-            #inertia_power[sequence].append(step_size * np.cumsum(np.abs(np.array(list(results[sequence]['Inertia','torque']))*list(results[sequence]['Inertia','velocity'])))[-1])
             engine_power = np.array(results[sequence]['Engine','torque'])*results[sequence]['Engine','velocity']
             inertia_power = np.array(results[sequence]['Inertia','torque'])*results[sequence]['Inertia','velocity']            
             power = np.array(results[sequence]['Engine','torque'])*results[sequence]['Inertia','velocity']
@@ -118,84 +142,15 @@ def residual_analysis():
     GS_velocity_error_subtract = [
         gs12 - gs21 for gs12, gs21 in zip(velocity_errors['Gauss-Seidel 12'], velocity_errors['Gauss-Seidel 21'])
     ]
-
-    _, axs = plt.subplots(3, 1, sharex=True)
-    axTotPowResidual, axTorqueErr, axVelErr = axs
-
-    for sequence in sequences:
-        axTotPowResidual.plot(step_sizes, tot_pow_residuals[sequence], label=sequence)
-        axTorqueErr.plot(step_sizes, torque_errors[sequence], label=sequence)
-        axVelErr.plot(step_sizes, velocity_errors[sequence], label=sequence)
-    axTotPowResidual.set_title('Total power residual')
-    axTorqueErr.set_title('Torque global error')
-    axVelErr.set_title('Velocity global error')
-
-    for ax in axs:
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.legend()
-    plt.show()
     
-    fig = plt.figure(2)
-    ax = fig.add_subplot(2, 1, 1)
-    plt.plot(step_sizes, GS_torque_error_subtract, label = 'trq GS12 - GS21')
-    ax.set_xscale('log')
-    plt.legend()
-    ax.set_title('GS12 - GS21 torque subtraction')
-    plt.subplot(212)
-    ax2 = fig.add_subplot(2, 1, 2)
-    plt.plot(step_sizes, GS_velocity_error_subtract, label = 'vel GS12 - GS21')
-    ax2.set_xscale('log')
-    plt.legend()
-    ax2.set_title('GS12 - GS21 velocity subtraction')
-    plt.show()
-    
-    fig = plt.figure(3)
-    ax = fig.add_subplot(2, 1, 1)
-    for sequence in sequences:
-        plt.plot(step_sizes, engine_power_errors[sequence], label = sequence)
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    plt.legend()
-    ax.set_title('Engine power error')
-    ax2 = fig.add_subplot(2, 1, 2)
-    for sequence in sequences:
-        plt.plot(step_sizes, inertia_power_errors[sequence], label = sequence)
-    ax2.set_xscale('log')
-    ax2.set_yscale('log')
-    plt.legend()
-    ax2.set_title('Inertia power error')    
-    plt.show()
-    
-    fig = plt.figure(4)
-    ax = fig.add_subplot(1, 1, 1)
-    for sequence in sequences:
-        plt.plot(step_sizes, power_errors[sequence], label = sequence)
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_title('Power error')
-    plt.legend()
-    plt.show()
-    
-    fig = plt.figure(5)
-    ax = fig.add_subplot(3, 1, 1)
-    for sequence in sequences:
-        plt.plot(step_sizes, conn_def_alpha[sequence], label = sequence)
-    ax.set_title('Alpha defect')
-    plt.legend()
-    ax = fig.add_subplot(3, 1, 2)
-    for sequence in sequences:
-        plt.plot(step_sizes, conn_def_velocity[sequence], label = sequence)
-    ax.set_title('Velocity defect')
-    plt.legend()
-    ax = fig.add_subplot(3, 1, 3)
-    for sequence in sequences:
-        plt.plot(step_sizes, conn_def_torque[sequence], label = sequence)
-    ax.set_title('Torque defect')
-    plt.legend()
-    plt.show()
+    plot_residual_analysis(step_sizes, [tot_pow_residuals, torque_errors, velocity_errors], sequences, 'log', 'log', ['Total power residual','Torque global error','Velocity global error' ])       
+    plot_residual_analysis(step_sizes, [GS_torque_error_subtract, GS_velocity_error_subtract], 0, 'log', 'linear', ['GS12 - GS21 torque subtraction', 'GS12 - GS21 velocity subtraction'],['trq GS12 - GS21','vel GS12 - GS21'])
+    plot_residual_analysis(step_sizes, [engine_power_errors, inertia_power_errors], sequences, 'log', 'log', ['Engine power error','Inertia power error'])   
+    plot_residual_analysis(step_sizes, [power_errors], sequences, 'log', 'log', 'Power error')    
+    plot_residual_analysis(step_sizes, [conn_def_alpha, conn_def_velocity, conn_def_torque], sequences, 'linear', 'linear', ['Alpha defect','Velocity defect','Torque defect' ])
+   
 
 
 if __name__ == '__main__':
-    plot_signals()
-    #residual_analysis()
+    #plot_signals()
+    residual_analysis()
