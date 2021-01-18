@@ -18,16 +18,16 @@ def fmu_dir():
     return path.join(current_dir(), 'FMUs')
 
 
-def monolitic_solution(step_size, tEnd):
+def monolithic_solution(step_size, tEnd):
     """A monolithic solution of the configuration"""
     fmu = path.join(fmu_dir(), 'TwoMassRotationalOscillator.fmu')
     fmpy_result = fmpy.simulate_fmu(fmu, start_time=0, stop_time=tEnd, step_size=step_size)
     ts = fmpy_result['time']
     results = {
-        ('OscillatorOmega2Tau', 'tauThis'): (ts, fmpy_result['tau_1']),
-        ('OscillatorOmega2Tau', 'omegaOther'): (ts, fmpy_result['omega_2']),
-        ('OscillatorTau2Omega', 'omegaThis'): (ts, fmpy_result['omega_2']),
-        ('OscillatorTau2Omega', 'tauOther'): (ts, fmpy_result['tau_1'])
+        ('Omega2Tau', 'tauThis'): (ts, fmpy_result['tau_1']),
+        ('Omega2Tau', 'omegaOther'): (ts, fmpy_result['omega_2']),
+        ('Tau2Omega', 'omegaThis'): (ts, fmpy_result['omega_2']),
+        ('Tau2Omega', 'tauOther'): (ts, fmpy_result['tau_1'])
     }
     return results
 
@@ -35,8 +35,8 @@ def co_simulations():
     """Co-simulations used in this demo"""
     sequences = {
         'Jacobi': None,
-        'Gauss-Seidel 12': ['Alpha', 'Engine', 'Inertia'],
-        'Gauss-Seidel 21': ['Alpha', 'Inertia', 'Engine']
+        'Gauss-Seidel 12': ['Omega2Tau', 'Tau2Omega'],
+        'Gauss-Seidel 21': ['Tau2Omega', 'Omega2Tau']
     }
     slaves, connections = configuration.read(fmu_dir(), 'example.xml')
     fmus = {name: master.load_fmu(name, description['archivePath']) for name, description in slaves.items()}
@@ -48,26 +48,27 @@ def run_simulations(slaves, connections, sequences, step_size, parameters):
     """
     Runs co-simulations and the analytical calculation for the give step size.
     """
-    tEnd = 50.
+    tEnd = step_size
     results = {
         name: master.run(slaves, connections, step_size, tEnd, sequence, parameters)
         for name, sequence in sequences.items()
     }
-    return results, analytical.solution(step_size, tEnd)
+    return results
 
 
 def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences, parameters = co_simulations()
     step_size = 1e-1
-    results, analytic  = run_simulations(slaves, connections, sequences, step_size, parameters)
-    results['analytical'] = analytic
+    tEnd = step_size
+    results = run_simulations(slaves, connections, sequences, step_size, parameters)
+    #results['monolithic'] = monolithic_solution(step_size, tEnd)
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
     for name, result in results.items():
-        ts = step_size * np.arange(len(result['Inertia', 'velocity']))
-        axVelocity.plot(ts, result['Inertia', 'velocity'], label=name)
-        axTorque.plot(ts, result['Engine', 'torque'], label=name)
+        ts = step_size * np.arange(len(result['Omega2Tau', 'tauThis']))
+        axVelocity.plot(ts, result['Tau2Omega', 'omegaThis'], label=name)
+        axTorque.plot(ts, result['Omega2Tau', 'tauThis'], label=name)
 
     axTorque.legend()
     plt.show()
@@ -147,5 +148,10 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
+    results = monolithic_solution(0.1, 50)
+    ts, omega = results['Tau2Omega', 'omegaThis']
+    plt.plot(ts, omega)
+    plt.show()
+    
     plot_signals()
     #residual_analysis()
