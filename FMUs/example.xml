@@ -4,24 +4,24 @@
         <Instance instanceName="Omega2Tau">
             <Archive archiveName="OscillatorOmega2Tau.fmu"/>
             <Parameters>
-                <Parameter name="J" value="1."/>
-                <Parameter name="c" value="1."/>
-                <Parameter name="d" value="1."/>
-                <Parameter name="ck" value="1."/>
-                <Parameter name="dk" value="1."/>
-                <Parameter name="phiThis0" value="0.1"/>
-                <Parameter name="omegaThis0" value="0.1"/>
-                <Parameter name="phiOther0" value="0.1"/>
+                <Parameter name="J" value="2."/>
+                <Parameter name="c" value="3."/>
+                <Parameter name="d" value="5."/>
+                <Parameter name="ck" value="7."/>
+                <Parameter name="dk" value="11."/>
+                <Parameter name="phiThis0" value="0.13"/>
+                <Parameter name="omegaThis0" value="0.17"/>
+                <Parameter name="phiOther0" value="0.37"/>
             </Parameters>
         </Instance>
 		<Instance instanceName="Tau2Omega">
             <Archive archiveName="OscillatorTau2Omega.fmu"/>
             <Parameters>
-                <Parameter name="m" value="1."/>
-                <Parameter name="c" value="1."/>
-                <Parameter name="d" value="1."/>
-                <Parameter name="x0" value="0.1"/>
-                <Parameter name="v0" value="0.1"/>
+                <Parameter name="J" value="2.3"/>
+                <Parameter name="c" value="2.9"/>
+                <Parameter name="d" value="3.1"/>
+                <Parameter name="phiThis0" value="0.37"/>
+                <Parameter name="omegaThis0" value="0.41"/>
             </Parameters>
         </Instance>
     </Instances>

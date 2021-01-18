@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Instances>
+        <Instance instanceName="Monolithic">
+            <Archive archiveName="TwoMassRotationalOscillator.fmu"/>
+            <Parameters>
+                <Parameter name="J_Omega2Tau" value="2."/>
+                <Parameter name="c_Omega2Tau" value="3."/>
+                <Parameter name="d_Omega2Tau" value="5."/>
+                <Parameter name="ck" value="7."/>
+                <Parameter name="dk" value="11."/>
+                <Parameter name="phi0_Omega2Tau" value="0.13"/>
+                <Parameter name="omega0_Omega2Tau" value="0.17"/>
+                <Parameter name="J_Tau2Omega" value="2.3"/>
+                <Parameter name="c_Tau2Omega" value="2.9"/>
+                <Parameter name="d_Tau2Omega" value="3.1"/>
+                <Parameter name="phi0_Tau2Omega" value="0.37"/>
+                <Parameter name="omega0_Tau2Omega" value="0.41"/>
+            </Parameters>
+        </Instance>
+    </Instances>
+</Configuration>

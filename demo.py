@@ -21,13 +21,16 @@ def fmu_dir():
 def monolithic_solution(step_size, tEnd):
     """A monolithic solution of the configuration"""
     fmu = path.join(fmu_dir(), 'TwoMassRotationalOscillator.fmu')
-    fmpy_result = fmpy.simulate_fmu(fmu, start_time=0, stop_time=tEnd, step_size=step_size)
-    ts = fmpy_result['time']
+    slaves, connections = configuration.read(fmu_dir(), 'monolithic.xml')
+    fmus = {name: master.load_fmu(name, description['archivePath']) for name, description in slaves.items()}
+    parameters = {name: description['parameters'] for name, description in slaves.items()}
+
+    monolithic_result = master.run(fmus, connections, step_size, tEnd, parameters=parameters)
     results = {
-        ('Omega2Tau', 'tauThis'): (ts, fmpy_result['tau_1']),
-        ('Omega2Tau', 'omegaOther'): (ts, fmpy_result['omega_2']),
-        ('Tau2Omega', 'omegaThis'): (ts, fmpy_result['omega_2']),
-        ('Tau2Omega', 'tauOther'): (ts, fmpy_result['tau_1'])
+        ('Omega2Tau', 'tauThis'): monolithic_result['Monolithic', 'tau'],
+        ('Omega2Tau', 'omegaOther'): monolithic_result['Monolithic', 'omega'],
+        ('Tau2Omega', 'omegaThis'): monolithic_result['Monolithic', 'omega'],
+        ('Tau2Omega', 'tauOther'): monolithic_result['Monolithic', 'tau']
     }
     return results
 
@@ -44,11 +47,10 @@ def co_simulations():
     return fmus, connections, sequences, parameters
 
 
-def run_simulations(slaves, connections, sequences, step_size, parameters):
+def run_simulations(slaves, connections, sequences, step_size, tEnd, parameters):
     """
     Runs co-simulations and the analytical calculation for the give step size.
     """
-    tEnd = step_size
     results = {
         name: master.run(slaves, connections, step_size, tEnd, sequence, parameters)
         for name, sequence in sequences.items()
@@ -60,9 +62,9 @@ def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences, parameters = co_simulations()
     step_size = 1e-1
-    tEnd = step_size
-    results = run_simulations(slaves, connections, sequences, step_size, parameters)
-    #results['monolithic'] = monolithic_solution(step_size, tEnd)
+    tEnd = 50.
+    results = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
+    results['monolithic'] = monolithic_solution(step_size, tEnd)
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
     for name, result in results.items():
@@ -70,6 +72,8 @@ def plot_signals():
         axVelocity.plot(ts, result['Tau2Omega', 'omegaThis'], label=name)
         axTorque.plot(ts, result['Omega2Tau', 'tauThis'], label=name)
 
+    axVelocity.set_title('velocity')
+    axTorque.set_title('torque')
     axTorque.legend()
     plt.show()
 
@@ -148,10 +152,5 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    results = monolithic_solution(0.1, 50)
-    ts, omega = results['Tau2Omega', 'omegaThis']
-    plt.plot(ts, omega)
-    plt.show()
-    
-    plot_signals()
+    plot_signals() 
     #residual_analysis()
