@@ -97,19 +97,13 @@ def residual_analysis():
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences} 
-    engine_power_errors = {sequence: [] for sequence in sequences}
-    inertia_power_errors = {sequence: [] for sequence in sequences}
     power_errors = {sequence: [] for sequence in sequences}
     conn_def_alpha = {sequence: [] for sequence in sequences}
     conn_def_velocity = {sequence: [] for sequence in sequences}
     conn_def_torque = {sequence: [] for sequence in sequences}
-    engineAnalytic_power = []
-    inertiaAnalytic_power = []
 
     for step_size in step_sizes:
         results, analytic = run_simulations(slaves, connections, sequences, step_size)
-        engineAnalytic_power = np.array(analytic['Engine','torque'])*analytic['Engine','velocity']
-        inertiaAnalytic_power = np.array(analytic['Inertia','torque'])*analytic['Inertia','velocity']
         Analytic_power = np.array(analytic['Engine','torque'])*analytic['Inertia','velocity']
             
         for sequence in sequences:
@@ -122,31 +116,17 @@ def residual_analysis():
             errs = evaluation.global_error(results[sequence], analytic, step_size)
             torque_errors[sequence].append(errs['Engine', 'torque'])
             velocity_errors[sequence].append(errs['Inertia', 'velocity'])
-            
-            engine_power = np.array(results[sequence]['Engine','torque'])*results[sequence]['Engine','velocity']
-            inertia_power = np.array(results[sequence]['Inertia','torque'])*results[sequence]['Inertia','velocity']            
+
             power = np.array(results[sequence]['Engine','torque'])*results[sequence]['Inertia','velocity']
-            
-            engine_power_errors[sequence].append(step_size*np.cumsum( np.abs(engine_power - engineAnalytic_power) )[-1])  
-            inertia_power_errors[sequence].append(step_size*np.cumsum( np.abs(inertia_power - inertiaAnalytic_power) )[-1])
+
             power_errors[sequence].append(step_size*np.cumsum( np.abs(power - Analytic_power) )[-1])
             
             input_defect = evaluation.connection_defects(connections, results[sequence])
             conn_def_alpha[sequence].append( step_size*np.cumsum( np.abs(input_defect['Engine', 'alpha']))[-1] )
             conn_def_velocity[sequence].append( step_size*np.cumsum( np.abs(input_defect['Engine', 'velocity']))[-1] )
             conn_def_torque[sequence].append( step_size*np.cumsum( np.abs(input_defect['Inertia', 'torque']))[-1] )
-
-    GS_torque_error_subtract = [
-        gs12 - gs21 for gs12, gs21 in zip(torque_errors['Gauss-Seidel 12'], torque_errors['Gauss-Seidel 21'])
-    ]
-    GS_velocity_error_subtract = [
-        gs12 - gs21 for gs12, gs21 in zip(velocity_errors['Gauss-Seidel 12'], velocity_errors['Gauss-Seidel 21'])
-    ]
     
-    plot_residual_analysis(step_sizes, [tot_pow_residuals, torque_errors, velocity_errors], sequences, 'log', 'log', ['Total power residual','Torque global error','Velocity global error' ])       
-    plot_residual_analysis(step_sizes, [GS_torque_error_subtract, GS_velocity_error_subtract], 0, 'log', 'linear', ['GS12 - GS21 torque subtraction', 'GS12 - GS21 velocity subtraction'],['trq GS12 - GS21','vel GS12 - GS21'])
-    plot_residual_analysis(step_sizes, [engine_power_errors, inertia_power_errors], sequences, 'log', 'log', ['Engine power error','Inertia power error'])   
-    plot_residual_analysis(step_sizes, [power_errors], sequences, 'log', 'log', 'Power error')    
+    plot_residual_analysis(step_sizes, [tot_pow_residuals, torque_errors, velocity_errors, power_errors], sequences, 'log', 'log', ['Total power residual','Torque global error','Velocity global error', 'Power error' ])
     plot_residual_analysis(step_sizes, [conn_def_alpha, conn_def_velocity, conn_def_torque], sequences, 'linear', 'linear', ['Alpha defect','Velocity defect','Torque defect' ])
    
 
