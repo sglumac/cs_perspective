@@ -1,6 +1,7 @@
 from os import path
 import matplotlib.pyplot as plt
 import numpy as np
+import fmpy
 import configuration
 import master
 import analytical
@@ -16,6 +17,19 @@ def fmu_dir():
     """The path to the directory with FMUs"""
     return path.join(current_dir(), 'FMUs')
 
+
+def monolitic_solution(step_size, tEnd):
+    """A monolithic solution of the configuration"""
+    fmu = path.join(fmu_dir(), 'TwoMassRotationalOscillator.fmu')
+    fmpy_result = fmpy.simulate_fmu(fmu, start_time=0, stop_time=tEnd, step_size=step_size)
+    ts = fmpy_result['time']
+    results = {
+        ('OscillatorOmega2Tau', 'tauThis'): (ts, fmpy_result['tau_1']),
+        ('OscillatorOmega2Tau', 'omegaOther'): (ts, fmpy_result['omega_2']),
+        ('OscillatorTau2Omega', 'omegaThis'): (ts, fmpy_result['omega_2']),
+        ('OscillatorTau2Omega', 'tauOther'): (ts, fmpy_result['tau_1'])
+    }
+    return results
 
 def co_simulations():
     """Co-simulations used in this demo"""
@@ -132,5 +146,5 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    #plot_signals()
-    residual_analysis()
+    plot_signals()
+    # residual_analysis()
