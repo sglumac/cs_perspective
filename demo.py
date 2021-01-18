@@ -26,16 +26,17 @@ def co_simulations():
     }
     slaves, connections = configuration.read(fmu_dir(), 'example.xml')
     fmus = {name: master.load_fmu(name, description['archivePath']) for name, description in slaves.items()}
-    return fmus, connections, sequences
+    parameters = {name: description['parameters'] for name, description in slaves.items()}
+    return fmus, connections, sequences, parameters
 
 
-def run_simulations(slaves, connections, sequences, step_size):
+def run_simulations(slaves, connections, sequences, step_size, parameters):
     """
     Runs co-simulations and the analytical calculation for the give step size.
     """
-    tEnd = 10.
+    tEnd = 50.
     results = {
-        name: master.run(slaves, connections, step_size, tEnd, sequence, {'Engine': {'w_omega': 3}})
+        name: master.run(slaves, connections, step_size, tEnd, sequence, parameters)
         for name, sequence in sequences.items()
     }
     return results, analytical.solution(step_size, tEnd)
@@ -43,9 +44,9 @@ def run_simulations(slaves, connections, sequences, step_size):
 
 def plot_signals():
     """Simple time plot of the signals in the graph"""
-    slaves, connections, sequences = co_simulations()
+    slaves, connections, sequences, parameters = co_simulations()
     step_size = 1e-1
-    results, analytic  = run_simulations(slaves, connections, sequences, step_size)
+    results, analytic  = run_simulations(slaves, connections, sequences, step_size, parameters)
     results['analytical'] = analytic
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
@@ -92,7 +93,7 @@ def residual_analysis():
     """
     The analysis of total power residual and its comparison to the global error.
     """
-    slaves, connections, sequences = co_simulations()
+    slaves, connections, sequences, parameters = co_simulations()
     step_sizes = [1 / den for den in 2 ** np.arange(1, 10)]
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
@@ -103,7 +104,7 @@ def residual_analysis():
     conn_def_torque = {sequence: [] for sequence in sequences}
 
     for step_size in step_sizes:
-        results, analytic = run_simulations(slaves, connections, sequences, step_size)
+        results, analytic = run_simulations(slaves, connections, sequences, step_size, parameters)
         Analytic_power = np.array(analytic['Engine','torque'])*analytic['Inertia','velocity']
             
         for sequence in sequences:
@@ -132,5 +133,5 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    #plot_signals()
-    residual_analysis()
+    plot_signals()
+    #residual_analysis()

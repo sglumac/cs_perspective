@@ -59,7 +59,7 @@ def run(slaves, connections, dt, tEnd, sequence=None, parameters=None):
                 (parameter_vars[parameter], value)
                 for parameter, value in parameters[name].items()
             )
-            slave.fmu.setReal(refs_vals.keys(), refs_vals.values())
+            slave.fmu.setReal(refs_vals.keys(), [float(num) for num in refs_vals.keys()])
         slave.fmu.exitInitializationMode()
  
     results = {
