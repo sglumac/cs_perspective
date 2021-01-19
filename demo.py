@@ -119,39 +119,38 @@ def residual_analysis():
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences} 
     power_errors = {sequence: [] for sequence in sequences}
-    conn_def_alpha = {sequence: [] for sequence in sequences}
-    conn_def_velocity = {sequence: [] for sequence in sequences}
-    conn_def_torque = {sequence: [] for sequence in sequences}
+    conn_def_omega = {sequence: [] for sequence in sequences}
+    conn_def_tau = {sequence: [] for sequence in sequences}
 
     for step_size in step_sizes:
-        results, analytic = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
-        Analytic_power = np.array(analytic['Engine','torque'])*analytic['Inertia','velocity']
+        results = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
+        monolithic = monolithic_solution(step_size, tEnd)
+        Monolithic_power = np.array(monolithic['Omega2Tau','tauThis'])*monolithic['Tau2Omega','omegaThis']
             
         for sequence in sequences:
             tot_pow_residuals[sequence].append(
                 evaluation.total_power_residual(
                     connections, results[sequence], step_size,
-                    ('Inertia', 'torque'), ('Engine', 'velocity')
+                    ('Omega2Tau', 'omegaOther'), ('Tau2Omega', 'tauOther')
                 )
             )
-            errs = evaluation.global_error(results[sequence], analytic, step_size)
-            torque_errors[sequence].append(errs['Engine', 'torque'])
-            velocity_errors[sequence].append(errs['Inertia', 'velocity'])
+            errs = evaluation.global_error(results[sequence], monolithic, step_size)
+            torque_errors[sequence].append(errs['Omega2Tau', 'tauThis'])
+            velocity_errors[sequence].append(errs['Tau2Omega', 'omegaThis'])
 
-            power = np.array(results[sequence]['Engine','torque'])*results[sequence]['Inertia','velocity']
+            power = np.array(results[sequence]['Omega2Tau','tauThis'])*results[sequence]['Tau2Omega','omegaThis']
 
-            power_errors[sequence].append(step_size*np.cumsum( np.abs(power - Analytic_power) )[-1])
+            power_errors[sequence].append(step_size*np.cumsum( np.abs(power - Monolithic_power) )[-1])
             
             input_defect = evaluation.connection_defects(connections, results[sequence])
-            conn_def_alpha[sequence].append( step_size*np.cumsum( np.abs(input_defect['Engine', 'alpha']))[-1] )
-            conn_def_velocity[sequence].append( step_size*np.cumsum( np.abs(input_defect['Engine', 'velocity']))[-1] )
-            conn_def_torque[sequence].append( step_size*np.cumsum( np.abs(input_defect['Inertia', 'torque']))[-1] )
+            conn_def_omega[sequence].append( step_size*np.cumsum( np.abs(input_defect['Tau2Omega', 'tauOther']))[-1] )
+            conn_def_tau[sequence].append( step_size*np.cumsum( np.abs(input_defect['Omega2Tau', 'omegaOther']))[-1] )
     
-    plot_residual_analysis(step_sizes, [tot_pow_residuals, torque_errors, velocity_errors, power_errors], sequences, 'log', 'log', ['Total power residual','Torque global error','Velocity global error', 'Power error' ])
-    plot_residual_analysis(step_sizes, [conn_def_alpha, conn_def_velocity, conn_def_torque], sequences, 'linear', 'linear', ['Alpha defect','Velocity defect','Torque defect' ])
+    plot_residual_analysis(step_sizes, [tot_pow_residuals, torque_errors, velocity_errors, power_errors], sequences, 'log', 'log', ['Total power residual','Tau global error','Omega global error', 'Power error' ])
+    plot_residual_analysis(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['Omega defect','Tau defect'])
    
 
 
 if __name__ == '__main__':
-    plot_signals() 
-    #residual_analysis()
+    #plot_signals() 
+    residual_analysis()
