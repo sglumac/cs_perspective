@@ -49,7 +49,6 @@ def run(slaves, connections, dt, tEnd, sequence=None, parameters=None):
     Jacobi (sequence=None)
     type co-simulation
     """
-    print(sequence)
     for name, slave in slaves.items():
         slave.fmu.instantiate()
         slave.fmu.setupExperiment(startTime=0.)
@@ -76,8 +75,6 @@ def run(slaves, connections, dt, tEnd, sequence=None, parameters=None):
 
     for slave in slaves.values():
         slave.fmu.exitInitializationMode()
-    
-    print("after intialization")
 
     results = {
         (name, port): []
