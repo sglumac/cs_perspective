@@ -4,17 +4,17 @@
         <Instance instanceName="Monolithic">
             <Archive archiveName="TwoMassRotationalOscillator.fmu"/>
             <Parameters>
-                <Parameter name="J_Omega2Tau" value="1."/>
+                <Parameter name="J_Omega2Tau" value="10."/>
                 <Parameter name="c_Omega2Tau" value="1."/>
                 <Parameter name="d_Omega2Tau" value="1."/>
                 <Parameter name="ck" value="1."/>
-                <Parameter name="dk" value="1."/>
-                <Parameter name="phi0_Omega2Tau" value="0.1"/>
+                <Parameter name="dk" value="2."/>
+                <Parameter name="phi0_Omega2Tau" value="0.2"/>
                 <Parameter name="omega0_Omega2Tau" value="0.1"/>
-                <Parameter name="J_Tau2Omega" value="1."/>
+                <Parameter name="J_Tau2Omega" value="10."/>
                 <Parameter name="c_Tau2Omega" value="1."/>
-                <Parameter name="d_Tau2Omega" value="1."/>
-                <Parameter name="phi0_Tau2Omega" value="0.1"/>
+                <Parameter name="d_Tau2Omega" value="2."/>
+                <Parameter name="phi0_Tau2Omega" value="0.2"/>
                 <Parameter name="omega0_Tau2Omega" value="0.1"/>
             </Parameters>
         </Instance>

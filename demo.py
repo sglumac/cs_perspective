@@ -62,7 +62,7 @@ def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences, parameters = co_simulations()
     step_size = 1e-1
-    tEnd = 50.
+    tEnd = 100.
     results = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
     results['monolithic'] = monolithic_solution(step_size, tEnd)
 
@@ -114,6 +114,7 @@ def residual_analysis():
     """
     slaves, connections, sequences, parameters = co_simulations()
     step_sizes = [1 / den for den in 2 ** np.arange(1, 10)]
+    tEnd = 50.
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
     tot_pow_residuals = {sequence: [] for sequence in sequences} 
@@ -123,7 +124,7 @@ def residual_analysis():
     conn_def_torque = {sequence: [] for sequence in sequences}
 
     for step_size in step_sizes:
-        results, analytic = run_simulations(slaves, connections, sequences, step_size, parameters)
+        results, analytic = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
         Analytic_power = np.array(analytic['Engine','torque'])*analytic['Inertia','velocity']
             
         for sequence in sequences:
