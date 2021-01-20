@@ -11,16 +11,16 @@
                 <Parameter name="dk" value="2."/>
                 <Parameter name="phiThis0" value="0.2"/>
                 <Parameter name="omegaThis0" value="0.1"/>
-                <Parameter name="phiOther0" value="0.2"/>
+                <Parameter name="phiOther0" value="0.1"/>
             </Parameters>
         </Instance>
 		<Instance instanceName="Tau2Omega">
             <Archive archiveName="OscillatorTau2Omega.fmu"/>
             <Parameters>
-                <Parameter name="J" value="10."/>
+                <Parameter name="J" value="5."/>
                 <Parameter name="c" value="1."/>
                 <Parameter name="d" value="2."/>
-                <Parameter name="phiThis0" value="0.2"/>
+                <Parameter name="phiThis0" value="0.1"/>
                 <Parameter name="omegaThis0" value="0.1"/>
             </Parameters>
         </Instance>

@@ -1,4 +1,5 @@
 from os import path
+from fractions import Fraction
 import matplotlib.pyplot as plt
 import numpy as np
 import fmpy
@@ -20,7 +21,6 @@ def fmu_dir():
 
 def monolithic_solution(step_size, tEnd):
     """A monolithic solution of the configuration"""
-    fmu = path.join(fmu_dir(), 'TwoMassRotationalOscillator.fmu')
     slaves, connections = configuration.read(fmu_dir(), 'monolithic.xml')
     fmus = {name: master.load_fmu(name, description['archivePath']) for name, description in slaves.items()}
     parameters = {name: description['parameters'] for name, description in slaves.items()}
@@ -62,7 +62,7 @@ def plot_signals():
     """Simple time plot of the signals in the graph"""
     slaves, connections, sequences, parameters = co_simulations()
     step_size = 1e-1
-    tEnd = 100.
+    tEnd = 50.
     results = run_simulations(slaves, connections, sequences, step_size, tEnd, parameters)
     results['monolithic'] = monolithic_solution(step_size, tEnd)
 
@@ -70,7 +70,9 @@ def plot_signals():
     for name, result in results.items():
         ts = step_size * np.arange(len(result['Omega2Tau', 'tauThis']))
         axVelocity.plot(ts, result['Tau2Omega', 'omegaThis'], label=name)
+        axVelocity.set_xlim(min(ts), max(ts))
         axTorque.plot(ts, result['Omega2Tau', 'tauThis'], label=name)
+        axTorque.set_xlim(min(ts), max(ts))
 
     axVelocity.set_title('velocity')
     axTorque.set_title('torque')
@@ -89,6 +91,7 @@ def plot_residual_analysis(dataX, dataY, sequences = 0, xScale = 'linear', yScal
                     ax.plot(dataX, dataY[i][sequence], label = ''.join([str(sequence) if legends == [] else legends[i]]))                     
             else:
                 ax.plot(dataX, dataY[i], label = legends[i])
+            ax.set_xlim(float(min(dataX)), float(max(dataX)))
             ax.set_xscale(xScale)
             ax.set_yscale(yScale)
             ax.legend()
@@ -113,7 +116,7 @@ def residual_analysis():
     The analysis of total power residual and its comparison to the global error.
     """
     slaves, connections, sequences, parameters = co_simulations()
-    step_sizes = [1 / den for den in 2 ** np.arange(1, 10)]
+    step_sizes = list(map(Fraction, np.logspace(-2, 0, num=10)))
     tEnd = 50.
     torque_errors = {sequence: [] for sequence in sequences}
     velocity_errors = {sequence: [] for sequence in sequences}
@@ -152,5 +155,5 @@ def residual_analysis():
 
 
 if __name__ == '__main__':
-    #plot_signals() 
+    plot_signals() 
     residual_analysis()
