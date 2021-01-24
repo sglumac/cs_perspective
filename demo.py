@@ -166,7 +166,7 @@ def residual_analysis():
             conn_def_tau[sequence].append( step_size*np.cumsum( np.abs(input_defect['Omega2Tau', 'omegaOther']))[-1] )
     
     analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', [r'total power residual $\mathrm{[Ws]}$', r'total error power $\mathrm{[Ws]}$' ])
-    analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'log', 'log', ['total velocity defect','total torque defect'])
+    analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['total velocity defect','total torque defect'])
    
 
 
