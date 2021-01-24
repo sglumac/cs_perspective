@@ -92,6 +92,7 @@ def plot_signals():
     color = {'Gauss-Seidel': 'g', 'Jacobi': 'b', 'monolithic': 'r--'}
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
+    plt.tight_layout()
     for name, result in results.items():
         ts = step_size * np.arange(len(result['Omega2Tau', 'tauThis']))
         axVelocity.plot(ts, result['Tau2Omega', 'omegaThis'], color[name], label=name)
@@ -99,42 +100,35 @@ def plot_signals():
         axTorque.plot(ts, result['Omega2Tau', 'tauThis'], color[name], label=name)
         axTorque.set_xlim(min(ts), max(ts))
 
-    axVelocity.set_title('velocity')
-    axTorque.set_title('torque')
-    axTorque.legend()
+    axVelocity.set_title(r'velocity $\mathrm{[rad/s]}$')
     axVelocity.legend()
+    axTorque.set_title(r'torque $\mathrm{[Nm]}$')
+    axTorque.legend()
+    axTorque.set_xlabel(r'time $[\mathrm{s}]$')
     plt.show()
 
 
 def analysis_plot(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'linear', titles = [], legends = []):
     """ The script fpr ploting data for mthod residual_analysis()"""
-    
+
     _, axs = plt.subplots(len(dataY), 1, sharex=True)   
+    plt.tight_layout()
     color = {'Gauss-Seidel': 'g', 'Jacobi': 'b', 'monolithic': 'r--'}
-    if len(dataY) > 1:
-        for ax, i in zip(axs, range(len(dataY))):    
-            if sequences != 0:
-                for sequence in sequences:    
-                    ax.plot(dataX, dataY[i][sequence], color[sequence], label = ''.join([str(sequence) if legends == [] else legends[i]]))                     
-            else:
-                ax.plot(dataX, dataY[i], color[sequence], label = legends[i])
-            ax.set_xlim(float(min(dataX)), float(max(dataX)))
-            ax.set_xscale(xScale)
-            ax.set_yscale(yScale)
-            ax.legend()
-            if titles != []:
-                ax.set_title(titles[i])
-    else:            
+
+    for ax, i in zip(axs, range(len(dataY))):    
         if sequences != 0:
-            for sequence in sequences:
-                axs.plot(dataX, dataY[0][sequence], color[sequence], label = ''.join([str(sequence) if legends == [] else legends]))
+            for sequence in sequences:    
+                ax.plot(dataX, dataY[i][sequence], color[sequence], label = ''.join([str(sequence) if legends == [] else legends[i]]))                     
         else:
-            axs.plot(dataX, dataY[0], color[sequence], label = legends)
-        axs.set_xscale(xScale)
-        axs.set_yscale(yScale)
-        axs.legend()
+            ax.plot(dataX, dataY[i], color[sequence], label = legends[i])
+        ax.set_xlim(float(min(dataX)), float(max(dataX)))
+        ax.set_xscale(xScale)
+        ax.set_yscale(yScale)
+        ax.legend()
         if titles != []:
-            axs.set_title(titles)
+            ax.set_title(titles[i])
+    
+    axs[-1].set_xlabel(r'step size $[\mathrm{s}]$')
     plt.show()
 
 
@@ -171,8 +165,8 @@ def residual_analysis():
             conn_def_omega[sequence].append( step_size*np.cumsum( np.abs(input_defect['Tau2Omega', 'tauOther']))[-1] )
             conn_def_tau[sequence].append( step_size*np.cumsum( np.abs(input_defect['Omega2Tau', 'omegaOther']))[-1] )
     
-    analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', ['Total power residual', 'Total error power' ])
-    analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['Omega defect','Torque defect'])
+    analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', [r'total power residual $\mathrm{[Ws]}$', r'total error power $\mathrm{[Ws]}$' ])
+    analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'log', 'log', ['total velocity defect','total torque defect'])
    
 
 
