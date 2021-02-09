@@ -92,7 +92,6 @@ def plot_signals():
     color = {'Gauss-Seidel': 'g', 'Jacobi': 'b', 'monolithic': 'r--'}
 
     _, (axVelocity, axTorque) = plt.subplots(2, 1, sharex=True)
-    plt.tight_layout()
     for name, result in results.items():
         ts = step_size * np.arange(len(result['Omega2Tau', 'tauThis']))
         axVelocity.plot(ts, result['Tau2Omega', 'omegaThis'], color[name], label=name)
@@ -109,10 +108,9 @@ def plot_signals():
 
 
 def analysis_plot(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'linear', titles = [], legends = []):
-    """ The script fpr ploting data for mthod residual_analysis()"""
+    """ The script for ploting data for method residual_analysis()"""
 
     _, axs = plt.subplots(len(dataY), 1, sharex=True)   
-    plt.tight_layout()
     color = {'Gauss-Seidel': 'g', 'Jacobi': 'b', 'monolithic': 'r--'}
 
     for ax, i in zip(axs, range(len(dataY))):    
@@ -166,7 +164,7 @@ def residual_analysis():
             conn_def_tau[sequence].append( step_size*np.cumsum( np.abs(input_defect['Omega2Tau', 'omegaOther']))[-1] )
     
     analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', [r'total power residual $\mathrm{[Ws]}$', r'total error power $\mathrm{[Ws]}$' ])
-    analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['total velocity defect','total torque defect'])
+    # analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['total velocity defect','total torque defect'])
    
 
 
