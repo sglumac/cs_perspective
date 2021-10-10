@@ -99,15 +99,18 @@ def plot_signals():
         axTorque.plot(ts, result['Omega2Tau', 'tauThis'], color[name], label=name)
         axTorque.set_xlim(min(ts), max(ts))
 
-    axVelocity.set_title(r'velocity $\mathrm{[rad/s]}$')
+    axVelocity.set_ylabel(r'$\omega_2\quad\mathrm{[rad/s]}$')
     axVelocity.legend()
-    axTorque.set_title(r'torque $\mathrm{[Nm]}$')
+    axTorque.set_ylabel(r'$\tau_1\quad\mathrm{[Nm]}$')
     axTorque.legend()
-    axTorque.set_xlabel(r'time $[\mathrm{s}]$')
+    axTorque.set_xlabel(r'$t\quad[\mathrm{s}]$')
+    plt.tight_layout()
+    plt.savefig('mil_output.png', dpi=600)
     plt.show()
 
 
-def analysis_plot(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'linear', titles = [], legends = []):
+
+def analysis_plot(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'linear', ylabels = [], legends = []):
     """ The script for ploting data for method residual_analysis()"""
 
     _, axs = plt.subplots(len(dataY), 1, sharex=True)   
@@ -123,10 +126,12 @@ def analysis_plot(dataX, dataY, sequences = 0, xScale = 'linear', yScale = 'line
         ax.set_xscale(xScale)
         ax.set_yscale(yScale)
         ax.legend()
-        if titles != []:
-            ax.set_title(titles[i])
+        if ylabels != []:
+            ax.set_ylabel(ylabels[i])
     
     axs[-1].set_xlabel(r'step size $[\mathrm{s}]$')
+    plt.tight_layout()
+    plt.savefig('mil_residual.png', dpi=600)
     plt.show()
 
 
@@ -163,7 +168,7 @@ def residual_analysis():
             conn_def_omega[sequence].append( step_size*np.cumsum( np.abs(input_defect['Tau2Omega', 'tauOther']))[-1] )
             conn_def_tau[sequence].append( step_size*np.cumsum( np.abs(input_defect['Omega2Tau', 'omegaOther']))[-1] )
     
-    analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', [r'total power residual $\mathrm{[Ws]}$', r'total error power $\mathrm{[Ws]}$' ])
+    analysis_plot(step_sizes, [tot_pow_residuals, power_errors], sequences, 'log', 'log', [r'$\delta{E}\left(t_{end}\right)\quad\mathrm{[Ws]}$', r'$\Delta{E}\left(t_{end}\right)\quad\mathrm{[Ws]}$' ])
     # analysis_plot(step_sizes, [conn_def_omega, conn_def_tau], sequences, 'linear', 'linear', ['total velocity defect','total torque defect'])
    
 
